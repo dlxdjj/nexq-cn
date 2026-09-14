@@ -1,0 +1,93 @@
+# Dependencies
+node_modules/
+target/
+
+# Build output
+dist/
+.astro/
+
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+.env.*
+!.env.example
+!.env.sample
+*.pem
+*.key
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.code-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+
+# Database
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Tauri
+src-tauri/target/
+src-tauri/gen/
+WixTools/
+
+# Tauri updater signing key
+src-tauri/.tauri-private-key
+
+# Recordings
+recordings/
+
+# Private runtime data, local diagnostics and distributable binaries
+/outputs/
+/backups/
+/test-results/
+/playwright-report/
+/.playwright-mcp/
+/models/
+/knowledge-base/
+/config.json
+/translation-config.json
+/nexq-settings.json
+*.sqlite
+*.sqlite3
+*.sqlite3-*
+*.wav
+*.mp3
+*.m4a
+*.mp4
+*.exe
+*.msi
+*.zip
+*.pfx
+*.p12
+*.credentials.json
+*.local.ps1
+# Fixed synthetic probe required by include_bytes!; not a personal recording.
+!src-tauri/fixtures/stt-probe.wav
+
+# Superpowers
+.superpowers/
+
+# Claude Code
+CLAUDE.md
+.claude/
+docs/development
+docs/superpowers
+
+# Logs
+*.log
+npm-debug.log*
+
+# Package manager locks (keep package-lock.json, ignore others)
+yarn.lock
+pnpm-lock.yaml
+bun.lockb
