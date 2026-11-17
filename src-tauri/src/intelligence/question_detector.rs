@@ -50,6 +50,54 @@ const INTERVIEW_PATTERNS: &[&str] = &[
     "what is your approach to",
 ];
 
+/// Request forms used when the transcription has no question mark.
+const INTERVIEW_REQUEST_STARTERS: &[&str] = &[
+    "tell me", "tell us", "explain", "describe", "introduce yourself",
+    "walk me through", "walk us through", "take me through", "take us through",
+    "give me an example", "give us an example", "give an example",
+    "give me one example", "give us one example", "give one example",
+    "share an example", "share one example", "share a story",
+    "share your experience", "share your approach", "share your perspective",
+    "talk about a time", "talk to me about a time", "talk to us about a time",
+    "elaborate on",
+];
+
+fn has_interview_request_start(text: &str) -> bool {
+    let normalized = text
+        .replace(['‘', '’'], "'")
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ");
+    let request = ["all right", "okay", "now", "next", "so"]
+        .iter()
+        .find_map(|prefix| {
+            normalized
+                .strip_prefix(*prefix)
+                .filter(|tail| tail.starts_with([' ', ',', ':']))
+                .map(|tail| tail.trim_start_matches([' ', ',', ':']))
+        })
+        .unwrap_or(&normalized);
+    let request = [
+        "i'd like you to ",
+        "i would like you to ",
+        "we'd like you to ",
+        "we would like you to ",
+    ]
+    .iter()
+    .find_map(|prefix| request.strip_prefix(*prefix))
+    .unwrap_or(request);
+    let request = request.strip_prefix("please ").unwrap_or(request);
+    let request = request
+        .strip_prefix("briefly ")
+        .or_else(|| request.strip_prefix("quickly "))
+        .unwrap_or(request);
+    INTERVIEW_REQUEST_STARTERS.iter().any(|starter| {
+        request.strip_prefix(*starter).is_some_and(|tail| {
+            tail.is_empty() || tail.starts_with(|ch: char| !ch.is_alphanumeric() && ch != '_')
+        })
+    })
+}
+
 impl QuestionDetector {
     pub fn new() -> Self {
         Self
@@ -72,7 +120,7 @@ impl QuestionDetector {
             let mut confidence: f64 = 0.0;
 
             // Layer 1: Check for question mark
-            if trimmed.ends_with('?') {
+            if trimmed.ends_with(['?', '？']) {
                 confidence = 0.95;
             }
 
@@ -88,12 +136,10 @@ impl QuestionDetector {
 
             // Layer 2: Check for interview-specific patterns
             let lower = trimmed.to_lowercase();
-            for pattern in INTERVIEW_PATTERNS {
-                if lower.contains(pattern) {
-                    // Interview patterns are strong signals
-                    confidence = confidence.max(0.85);
-                    break;
-                }
+            if has_interview_request_start(&lower)
+                || INTERVIEW_PATTERNS.iter().any(|pattern| lower.contains(*pattern))
+            {
+                confidence = confidence.max(0.85);
             }
 
             // Only include if confidence is above threshold
@@ -118,7 +164,7 @@ fn split_sentences(text: &str) -> Vec<String> {
 
     for ch in text.chars() {
         current.push(ch);
-        if ch == '.' || ch == '?' || ch == '!' {
+        if matches!(ch, '.' | '?' | '!' | '。' | '？' | '！' | '\n') {
             let trimmed = current.trim().to_string();
             if !trimmed.is_empty() {
                 sentences.push(trimmed);
@@ -134,4 +180,32 @@ fn split_sentences(text: &str) -> Vec<String> {
     }
 
     sentences
+}
+
+#[cfg(test)]
+mod tests {
+    use super::QuestionDetector;
+
+    #[test]
+    fn detects_interview_requests_for_fallback_assist() {
+        let detector = QuestionDetector::new();
+        for text in [
+            "Give me an example of a time you led a team.",
+            "I’d like you to briefly describe a difficult project.",
+            "Thanks for the introduction. Next, share your approach.",
+            "Okay, take me through your decision.",
+        ] {
+            assert_eq!(detector.detect_questions(text, 0, "Them").len(), 1, "{text}");
+        }
+        for text in [
+            "I'd like to describe our team before we begin.",
+            "I would like you to pause while I pull up your résumé.",
+            "Thanks for your time. The next step is a call with our team.",
+        ] {
+            assert!(
+                detector.detect_questions(text, 0, "Them").is_empty(),
+                "{text}"
+            );
+        }
+    }
 }

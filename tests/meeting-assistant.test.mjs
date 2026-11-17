@@ -34,6 +34,27 @@ test('detects spoken questions and excludes plain assertions', () => {
   for (const text of ['Can you explain the rollout?', 'How quickly can we deploy', 'Please walk us through the setup', 'We need this by Friday?']) assert.equal(looksLikeMeetingQuestion(text), true);
   for (const text of ['Good morning.', 'We encrypt all customer data.', 'The timeline is two weeks.']) assert.equal(looksLikeMeetingQuestion(text), false);
 });
+test('recognizes English interview requests without a question mark', () => {
+  const requests = [
+    'Give me an example of a time you led a team.',
+    'Please give us one example from your last role',
+    'I’d like you to briefly describe a difficult project.',
+    "We'd like you to describe your contributions",
+    'Next, I would like you to explain how you validated the result.',
+    'Thanks for the introduction. Share an example of handling conflict.',
+    'Okay, take me through your decision.',
+    'Talk about a time when you missed a deadline.',
+  ];
+  for (const request of requests) assert.equal(looksLikeMeetingQuestion(request), true, request);
+
+  const statements = [
+    "I'd like to describe our team before we begin.",
+    'I would like you to pause while I pull up your résumé.',
+    'She asked me to give an example in the last round.',
+    'Thanks for your time. The next step is a call with our team.',
+  ];
+  for (const statement of statements) assert.equal(looksLikeMeetingQuestion(statement), false, statement);
+});
 test('configuration errors have actionable Chinese messages', () => {
   assert.match(chineseAssistantError('No active LLM provider: none'), /配置 AI 服务/);
   assert.match(chineseAssistantError('No active model selected'), /选择或下载模型/);

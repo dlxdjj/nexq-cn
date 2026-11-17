@@ -46,6 +46,7 @@ mockIPC(async (command, raw) => {
     await emit("llm_stream_start", {
       mode: args.mode, model: "界面测试模型", provider: "模拟服务",
       question: args.customQuestion || question, rag_status: oralPractice ? "no_index" : "matched", include_rag: true,
+      web_search_status: oralPractice ? undefined : "matched",
       rag_chunks: oralPractice ? [] : [{ source: "示例产品资料.md（虚构测试资料）", chunk_index: 0, text: "Customer data is encrypted at rest and in transit. Standard deployment: ten business days.", normalized_score: 0.8, raw_score: 0.8 }],
     });
     const chunks = oralPractice
@@ -56,6 +57,7 @@ mockIPC(async (command, raw) => {
       await emit("llm_stream_token", { token });
       await delay(800);
     }
+    if (!oralPractice) await emit("llm_stream_sources", { sources: [{ title: "示例网页来源", url: "https://example.com/reference" }] });
     await emit("llm_stream_end", { total_tokens: 35, latency_ms: 2400 });
     return;
   }

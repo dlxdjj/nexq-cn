@@ -409,6 +409,8 @@ pub async fn test_rag_answer(
         model_name,
         provider_name,
         crate::llm::provider::GenerationParams::default(),
+        None,                       // web_search_status
+        Vec::new(),                 // web_sources
         // Metadata for StreamStartEvent (test-rag defaults)
         0.7,                        // temperature (default)
         Some(query.clone()),        // rag_query

@@ -26,7 +26,7 @@ const assert = require('node:assert/strict');
     assert.equal(Object.keys(speakers).length, 2);
     assert.equal(await page.getByText(/发言者\s*\d/).count(), 0);
     console.log('PASS: cold overlay state and identical diarization IDs still have distinct fixed channel labels; real thanks preserved');
-    const question = 'Would you want to live there again in future? Please explain your reasons and how your plans might affect that decision.';
+    const question = 'Thanks for explaining your last role. Give me an example of a time you led a team under a tight deadline. Include how you divided the work and how you measured the result.';
     await send(question.slice(0,56), 'Them', 'them_session_speech_turn_2', false);
     await page.waitForTimeout(1600);
     assert.equal(await page.evaluate(() => window.__cnTest.stats.generations), 0);

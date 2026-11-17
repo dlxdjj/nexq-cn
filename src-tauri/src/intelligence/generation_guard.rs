@@ -1,4 +1,11 @@
 use std::sync::{Arc, atomic::{AtomicBool, Ordering}};
+use std::time::Duration;
+
+pub async fn wait_for_cancellation(cancel_requested: &AtomicBool) {
+    while !cancel_requested.load(Ordering::SeqCst) {
+        tokio::time::sleep(Duration::from_millis(50)).await;
+    }
+}
 
 /// Release the generation slot on every exit path, including preparation errors.
 pub struct GenerationGuard(Arc<AtomicBool>);

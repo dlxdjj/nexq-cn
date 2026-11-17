@@ -51,8 +51,26 @@ if ($Action -in @('test','probe')) {
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     }
 } else {
-    $buildArgs = @('node_modules/@tauri-apps/cli/tauri.js', 'build', '--bundles', 'nsis')
+    $tauriCli = 'node_modules/@tauri-apps/cli/tauri.js'
+    $buildArgs = @($tauriCli, 'build', '--no-bundle')
     if ($Offline) { $buildArgs += @('--', '--offline') }
     & node @buildArgs
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+    $metadataText = & cargo metadata --manifest-path src-tauri/Cargo.toml --format-version 1 --no-deps @cargoNetworkArgs
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    $targetPath = ($metadataText | ConvertFrom-Json).target_directory
+    $directML = Join-Path $targetPath 'release\DirectML.dll'
+    if (-not (Test-Path -LiteralPath $directML -PathType Leaf)) {
+        throw 'DirectML.dll was not copied to the Windows release directory by the runtime build.'
+    }
+
+    # Tauri does not automatically include DLLs next to the Cargo executable.
+    $resources = @{}
+    $resources[$directML] = 'DirectML.dll'
+    $bundleConfig = @{ bundle = @{ resources = $resources } } | ConvertTo-Json -Depth 4
+    $configPath = Join-Path $targetPath 'nexq-nsis-resources.json'
+    [System.IO.File]::WriteAllText($configPath, $bundleConfig)
+    & node $tauriCli bundle --bundles nsis --config $configPath
 }
 exit $LASTEXITCODE

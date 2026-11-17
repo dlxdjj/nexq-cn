@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useAIActionsStore } from "../stores/aiActionsStore";
+import { WebSearchSettings } from "./WebSearchSettings";
 import type { ActionConfig, InstructionPresets } from "../lib/types";
 import {
   ChevronDown,
@@ -638,6 +639,8 @@ export function AIActionsSettings() {
         </div>
       </div>
 
+      <WebSearchSettings />
+
       {/* ═══ Actions (full width) ═══ */}
       <div className="rounded-xl border border-border/30 bg-card/50 p-4">
         <SectionHeader
@@ -895,7 +898,7 @@ function ActionCard({
                 { key: "includeRagChunks", label: "RAG Chunks", checked: action.includeRagChunks },
                 { key: "includeCustomInstructions", label: "Custom Instructions", checked: action.includeCustomInstructions },
                 { key: "includeDetectedQuestion", label: "Detected Question", checked: action.includeDetectedQuestion },
-                { key: "webSearch", label: "Web Search", checked: action.webSearch },
+                { key: "webSearch", label: "联网搜索", checked: action.webSearch },
               ].map(({ key, label, checked }) => (
                 <label key={key} className="flex items-center gap-2 cursor-pointer">
                   <input

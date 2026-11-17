@@ -67,6 +67,7 @@ export const useStreamStore = create<StreamState>((set, get) => ({
       currentEvidence: metadata ? {
         status: metadata.rag_status || (metadata.rag_chunks?.length ? "matched" : metadata.include_rag ? "no_match" : "disabled"),
         chunks: metadata.rag_chunks || [],
+        webSearchStatus: metadata.web_search_status,
       } : undefined,
       isStreaming: true,
       currentContent: "",

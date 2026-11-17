@@ -96,6 +96,8 @@ pub struct StreamStartPayload {
     pub question: Option<String>,
     #[serde(default)]
     pub rag_status: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub web_search_status: Option<WebSearchStatus>,
     pub system_prompt: String,
     pub user_prompt: String,
     pub include_transcript: bool,
@@ -134,14 +136,26 @@ pub struct StreamEndPayload {
     pub latency_ms: u64,
 }
 
-/// A single web search result/source surfaced by provider-native grounding (e.g. Gemini).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum WebSearchStatus {
+    Matched,
+    NoResults,
+    Timeout,
+    Error,
+    NotConfigured,
+    NoQuery,
+    Native,
+}
+
+/// A single web search result surfaced by external search or provider-native grounding.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct StreamSource {
     pub title: String,
     pub url: String,
 }
 
-/// Emitted once, after streaming completes, when the provider returned grounding sources.
+/// Emitted during generation to attach search results to the current answer.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct StreamSourcesPayload {
     pub sources: Vec<StreamSource>,

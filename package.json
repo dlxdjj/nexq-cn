@@ -1,7 +1,7 @@
 {
   "name": "nexq",
   "private": true,
-  "version": "2.20.13-cn.4",
+  "version": "2.20.14-cn.5",
   "type": "module",
   "scripts": {
     "test:cn": "node --test tests/meeting-assistant.test.mjs",

@@ -4,6 +4,7 @@ pub mod prompt_templates;
 pub mod question_detector;
 pub mod transcript_buffer;
 pub mod generation_guard;
+pub mod web_search;
 
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -16,7 +17,7 @@ use context_builder::ContextBuilder;
 use question_detector::{DetectedQuestion, QuestionDetector};
 use transcript_buffer::TranscriptBuffer;
 
-use crate::llm::provider::GenerationParams;
+use crate::llm::provider::{GenerationParams, StreamSource, StreamSourcesPayload, WebSearchStatus};
 
 /// Event payload for question detection events emitted to the frontend.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -102,6 +103,8 @@ impl IntelligenceEngine {
         model: String,
         provider_name: String,
         params: GenerationParams,
+        web_search_status: Option<WebSearchStatus>,
+        web_sources: Vec<StreamSource>,
         // New metadata fields for StreamStartEvent
         temperature: f64,
         rag_query: Option<String>,
@@ -154,6 +157,7 @@ impl IntelligenceEngine {
                 provider: provider_name.clone(),
                 question: custom_question.map(str::to_string).or_else(|| last_question.as_ref().map(|q| q.text.clone())),
                 rag_status,
+                web_search_status,
                 system_prompt: system_msg,
                 user_prompt: user_msg,
                 include_transcript,
@@ -170,15 +174,14 @@ impl IntelligenceEngine {
                 transcript_segments_total,
             },
         );
+        if !web_sources.is_empty() {
+            let _ = app_handle.emit("llm_stream_sources", StreamSourcesPayload { sources: web_sources });
+        }
 
         // Call the LLM provider's stream_completion
         let result = tokio::select! {
             result = llm_provider.stream_completion(messages, &model, params, app_handle.clone().into()) => result,
-            _ = async {
-                while !cancel_flag.load(Ordering::SeqCst) {
-                    tokio::time::sleep(std::time::Duration::from_millis(50)).await;
-                }
-            } => {
+            _ = generation_guard::wait_for_cancellation(&cancel_flag) => {
                 let message = "Generation cancelled".to_string();
                 let _ = app_handle.emit("llm_stream_error", &message);
                 return Err(message);

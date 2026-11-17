@@ -308,6 +308,10 @@ export async function hasApiKey(provider: string): Promise<boolean> {
   return invoke("has_api_key", { provider });
 }
 
+export async function testWebSearch(): Promise<void> {
+  return invoke("test_web_search");
+}
+
 // == IPC: Meetings (Sub-PRD 1/8) ==
 
 export async function startMeeting(

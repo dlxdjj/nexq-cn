@@ -216,7 +216,10 @@ export interface AIResponse {
 export interface KnowledgeEvidenceInfo {
   status: string;
   chunks: RagChunkInfo[];
+  webSearchStatus?: WebSearchStatus;
 }
+
+export type WebSearchStatus = "matched" | "no_results" | "timeout" | "error" | "not_configured" | "no_query" | "native";
 
 export interface ModelInfo {
   id: string;
@@ -508,6 +511,7 @@ export interface StreamStartEvent {
   provider: string;
   question?: string;
   rag_status?: string;
+  web_search_status?: WebSearchStatus;
   system_prompt: string;
   user_prompt: string;
   include_transcript: boolean;

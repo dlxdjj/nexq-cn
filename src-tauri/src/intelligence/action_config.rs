@@ -18,7 +18,7 @@ pub struct ActionConfig {
     pub include_custom_instructions: bool,
     pub include_detected_question: bool,
 
-    /// Enable provider-native web search/grounding for this action (Gemini google_search, OpenRouter :online).
+    /// Enable web search for this action through Tavily or provider-native search.
     #[serde(default)]
     pub web_search: bool,
 

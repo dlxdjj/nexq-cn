@@ -2,7 +2,15 @@
 
 基于 NexQ 的非官方 Windows 中文定制版，面向英文线上会议、课程交流和口语练习：在悬浮窗口中查看对方英文原话、中文翻译、可直接说出的英文建议回复及其中文翻译，并按配置检索上传的参考资料。
 
-当前应用版本：**2.20.13-cn.4**（原生安装版本号为 `2.20.13`）。本仓库保存源码，不包含个人 API Key、会议记录、用户资料库或本机安装包。
+当前应用版本为 **2.20.14-cn.5**（Windows 安装版本号为 `2.20.14`）。本仓库保存源码，不包含个人 API Key、会议记录、用户资料库或本机安装包。
+
+Windows x64 安装包、完整源码和使用说明可在 [cn.5 发布页](https://github.com/dlxdjj/nexq-cn/releases/tag/v2.20.14-cn.5) 下载。
+
+## cn5 更新
+
+- 自动回复识别更多常见英文面试问法，包括以 “Give me an example” 和 “I’d like you to describe” 开头的请求。
+- 在「设置 → AI 操作 → 联网搜索」中保存 Tavily API Key，点击「测试搜索」，再勾选「为『生成回复』启用联网搜索」。OpenAI 等回答模型可以使用搜索结果，回复区会显示网页来源。
+- Tavily 接收当前问题。搜索遇到错误或超时时，应用继续使用已有上下文生成回答。搜索密钥保存在 Windows 凭据管理器。不开启联网也可以使用本地知识库。
 
 > 本项目不是 Teams 官方插件，不会自动替你发言或发送消息。它通过本机麦克风与系统回环音频工作。云端语音识别和大模型会接收相应音频、文本或检索片段，不能称为“所有数据完全离线”。请在获得必要许可、符合会议或课程规则的情况下使用。
 
@@ -81,7 +89,7 @@ NexQ 原有的 Tauri/Rust/React 架构、双通道录音、转写服务接入、
 
 以下是本版已验证链路的示例，不是对未来模型可用性或价格的保证；密钥和设置不会随仓库自动迁移到另一台电脑。
 
-1. 安装自己构建或从本仓库可信私有发布获得的 Windows x64 安装包；如果本仓库尚无 Release，请按下节构建。不要用上游 Release 替代中文定制包。
+1. 从 [本仓库发布页](https://github.com/dlxdjj/nexq-cn/releases) 下载 Windows x64 安装包，或按下节从源码构建。
 2. 在 LLM 设置中选择 OpenAI，填入自己的官方 API Key。cn4 固定样本验证使用的是 `gpt-4.1-mini-2025-04-14`。保存后运行“测试模型生成”。
 3. 在 STT 设置选择 Whisper API（实现使用 `whisper-1`），填写对应密钥，选择英文识别并测试。网页语音识别和 Windows 原生识别仍属于其他服务路径，不是本次长话轮修复的主要验证对象。
 4. 实时翻译选择大模型翻译，源语言英文、目标语言中文；它复用配置的 LLM，仍会消耗 API 用量。
@@ -117,7 +125,7 @@ npm run test:cn
 npm run build
 npm run tauri -- dev
 # 生产安装包
-npm run tauri -- build --bundles nsis
+powershell -NoProfile -File scripts/build-cn.ps1 -Action build
 ```
 
 默认安装包输出位于 `src-tauri/target/release/bundle/nsis/`；设置 `CARGO_TARGET_DIR` 时会改变位置。源码保留 `scripts/build-cn.ps1`，用于 Windows 原生测试和打包；工具必须位于 PATH，或通过脚本参数/环境变量指定，详见 [测试说明](tests/README.md)。

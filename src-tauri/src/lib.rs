@@ -538,6 +538,7 @@ pub fn run() {
             llm_commands::list_openrouter_models,
             // == COMMANDS: intelligence ==
             intelligence_commands::generate_assist,
+            intelligence_commands::test_web_search,
             intelligence_commands::cancel_generation,
             intelligence_commands::set_auto_trigger,
             intelligence_commands::set_context_window_seconds,

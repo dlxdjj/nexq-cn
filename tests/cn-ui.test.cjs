@@ -15,6 +15,8 @@ const assert = require('node:assert/strict');
     await page.getByRole('button', { name: '已生成 · 再次生成', exact: true }).waitFor();
     await page.getByText('我可以和交付团队确认具体范围。', { exact: true }).waitFor();
     assert.equal(await page.evaluate(() => window.__cnTest.stats.generations), 1);
+    await page.getByText('已找到网页资料，可查看下方来源', { exact: false }).waitFor();
+    assert.equal(await page.getByRole('link', { name: '示例网页来源' }).getAttribute('href'), 'https://example.com/reference');
     await page.getByText('查看 1 个实际检索片段与文件来源', { exact: true }).click();
     await page.getByText('[Source 1] 示例产品资料.md（虚构测试资料） · 片段 1', { exact: true }).waitFor();
     await page.getByText('查看 1 个实际检索片段与文件来源', { exact: true }).click();

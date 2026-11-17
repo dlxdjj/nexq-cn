@@ -1,4 +1,4 @@
-import type { KnowledgeEvidenceInfo } from "../lib/types";
+import type { KnowledgeEvidenceInfo, WebSearchStatus } from "../lib/types";
 
 const labels: Record<string, string> = {
   disabled: "本次操作未启用知识库检索",
@@ -11,11 +11,26 @@ const labels: Record<string, string> = {
   matched: "已检索到参考片段（不代表答案已核实）",
 };
 
+const webSearchLabels: Record<WebSearchStatus, string> = {
+  matched: "已找到网页资料，可查看下方来源",
+  no_results: "未找到可用的网页资料",
+  timeout: "搜索超时，继续使用已有上下文",
+  error: "搜索失败，继续使用已有上下文",
+  not_configured: "请在「设置 → AI 操作」中配置 Tavily 密钥",
+  no_query: "本次没有可搜索的问题",
+  native: "由当前回答模型按需搜索",
+};
+
 export function KnowledgeEvidence({ evidence }: { evidence?: KnowledgeEvidenceInfo }) {
   if (!evidence) return null;
   return (
     <div className="rounded-lg border border-border/30 bg-background/30 p-2 text-xs" data-no-ui-translate>
       <p className={evidence.status === "matched" ? "text-emerald-400" : "text-warning"}>知识库：{labels[evidence.status] || "状态未知，请核对资料"}</p>
+      {evidence.webSearchStatus && (
+        <p className={evidence.webSearchStatus === "matched" ? "text-emerald-400" : "text-muted-foreground"}>
+          联网搜索 · {webSearchLabels[evidence.webSearchStatus]}
+        </p>
+      )}
       {evidence.chunks.length > 0 && (
         <details className="mt-1">
           <summary className="cursor-pointer text-muted-foreground">查看 {evidence.chunks.length} 个实际检索片段与文件来源</summary>

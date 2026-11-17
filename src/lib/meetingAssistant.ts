@@ -26,12 +26,20 @@ export function hasSpeechText(text: string): boolean {
   return /[\p{L}\p{N}]/u.test(text);
 }
 
+const INTERVIEW_LEAD_IN = /^(?:all right|okay|now|next|so)[,:]?\s+/;
+const INTERVIEW_REQUEST_PREFIX = /^(?:(?:i|we)(?:'d| would) like you to\s+)?(?:please\s+)?(?:(?:briefly|quickly)\s+)?/;
+const EXPLANATION_REQUEST = /^(?:tell (?:me|us)|explain|describe|(?:walk|take) (?:me|us) through|introduce yourself|elaborate on)\b/;
+const EXAMPLE_REQUEST = /^(?:give (?:(?:me|us) )?(?:an|one) example|share (?:(?:an|one) example|a story|your (?:experience|approach|perspective))|talk (?:to (?:me|us) )?about a time)\b/;
+
 export function looksLikeMeetingQuestion(text: string): boolean {
   if (!hasSpeechText(text)) return false;
-  const normalized = text.trim().toLowerCase();
+  const normalized = text.trim().toLowerCase().replace(/[‘’]/g, "'").replace(/[^\S\r\n]+/g, " ");
   return /[?？]/.test(normalized) || /^(what|how|why|when|where|who|which)\b/.test(normalized)
     || /^(can|could|would|will|do|does|did|are|is|have|has)\s+(you|we|your|there|it|the)\b/.test(normalized)
-    || /^(please\s+)?(tell me|tell us|explain|describe|walk us through|walk me through)\b/.test(normalized);
+    || translationSegments(normalized, true).some((sentence) => {
+      const request = sentence.replace(INTERVIEW_LEAD_IN, "").replace(INTERVIEW_REQUEST_PREFIX, "");
+      return EXPLANATION_REQUEST.test(request) || EXAMPLE_REQUEST.test(request);
+    });
 }
 
 export function chineseAssistantError(error: unknown): string {

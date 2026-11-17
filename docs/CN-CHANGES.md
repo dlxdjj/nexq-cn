@@ -1,6 +1,8 @@
 # 中文定制改动索引
 
-基线：`naxhq/NexQ@1ce1524c122df509f231c521a07ada95bfde2d88`。应用版本：`2.20.13-cn.4`。
+基线：`naxhq/NexQ@1ce1524c122df509f231c521a07ada95bfde2d88`。应用版本为 `2.20.14-cn.5`。
+
+cn5 增加 Tavily 网页搜索、结果来源与搜索状态展示，扩展英文面试请求识别，并在 Windows 安装包中包含 DirectML.dll。搜索设置位于「AI 操作」，密钥使用既有 Windows 凭据管理器。
 
 此清单汇总本次定制的累积改动，并非上游已有能力清单；`CHANGELOG.md` 和 `README.upstream.md` 保留的是上游历史资料。cn1–cn3 的中间改动未逐次形成 Git 提交，不伪造逐版提交历史。
 
